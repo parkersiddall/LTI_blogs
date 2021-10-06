@@ -1,10 +1,13 @@
 const express = require('express')
+const pug = require('pug')
 const morganBody = require('morgan-body')
 
-// initiate app with parsers
+// initiate and configure app
 const app = express()
 app.use(express.json())
 app.use(express.urlencoded())
+app.set('views', './views')
+app.set('view engine', 'pug')
 
 // middleware
 morganBody(app);
@@ -17,8 +20,9 @@ app.get('/', (request, response) => {
 app.post('/lti', (request, response) => {
     
     // handle launch data here
-    response.json({
-        message: "not yet implemented"
+    response.render('lti_launch', {
+        title: "You've launched!",
+        message: JSON.stringify(request.body)
     })
 })
 
