@@ -1,9 +1,13 @@
 const express = require('express')
+const morganBody = require('morgan-body')
 
 // initiate app with parsers
 const app = express()
 app.use(express.json())
 app.use(express.urlencoded())
+
+// middleware
+morganBody(app);
 
 // routes
 app.get('/', (request, response) => {
@@ -13,7 +17,6 @@ app.get('/', (request, response) => {
 app.post('/lti', (request, response) => {
     
     // handle launch data here
-    console.log(request.body)
     response.json({
         message: "not yet implemented"
     })
