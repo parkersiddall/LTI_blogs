@@ -2,6 +2,19 @@ const express = require('express')
 const pug = require('pug')
 const morganBody = require('morgan-body')
 const middleware_lti = require('./utilities/middleware_lti')
+const mongoose = require('mongoose')
+const config = require('./utilities/config')
+
+const url = config.MONGO_URL
+
+console.log(`Connecting to database:`, url)
+mongoose.connect(url, { useNewUrlParser: true })
+  .then(result => {
+    console.log('Connected to MongoDB')
+  })
+  .catch((error) => {
+    console.log(error)
+  })
 
 // initiate and configure app
 const app = express()
