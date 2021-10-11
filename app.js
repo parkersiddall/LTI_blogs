@@ -4,6 +4,7 @@ const morganBody = require("morgan-body")
 const middleware_lti = require("./utilities/middleware_lti")
 const mongoose = require("mongoose")
 const config = require("./utilities/config")
+const session = require('express-session')
 
 const url = config.MONGO_URL
 
@@ -26,17 +27,31 @@ app.set("view engine", "pug")
 
 // middleware
 morganBody(app)
+app.use(session({
+  secret: config.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  // store: config.NODE_ENV == "production" ? sessionStore : MemoryStore,
+  cookie: { 
+    maxAge: 60 * 60 * 1000  // minutes , seconds, milleseconds (1 hour)
+  }
+}))
 
 // routes
 app.get("/", (request, response) => {
   response.send("<h1>Hello World, this is LTI 1.1</h1>")
 })
 
-app.post("/lti", middleware_lti.validate_lti_launch, (request, response) => {
-  response.render("lti_launch", {
-    title: "You've launched!",
-    message: JSON.stringify(request.body),
-  })
-})
+app.post(
+  "/lti",
+  middleware_lti.validate_lti_launch,
+  middleware_lti.establish_session,
+  (request, response) => {
+    response.render("lti_launch", {
+      title: "You've launched!",
+      message: JSON.stringify(request.body),
+    })
+  }
+)
 
 module.exports = app

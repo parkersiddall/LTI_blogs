@@ -8,6 +8,7 @@ https://www.imsglobal.org/learning-tools-interoperability-verifying-launch-messa
 
 const config = require("./config")
 const lti = require("ims-lti")
+const User = require("../models/user")
 
 // check required LTI parameters
 const confirm_launch_request = (request, response, next) => {
@@ -36,7 +37,6 @@ const validate_lti_launch = (request, response, next) => {
   // initiate provider and validate
   ltiProvider = new lti.Provider(consumer_key, consumer_secret)
   ltiProvider.valid_request(request, (err, isValid) => {
-    console.log(err, isValid)
     if (err) {
       response.status(400).send({ error: err })
     } else if (!isValid) {
@@ -67,10 +67,39 @@ const check_app_parameters = (request, response, next) => {
 }
 
 // establish a user session
-const establish_session = (request, response, next) => {
-  // cancel any previous cookies from this site
-  // check if user already esists
-  // initialize login session with use id or email, role, resource ID, return url
+const establish_session = async (request, response, next) => {
+  // check any previous auth data from this site, clear it
+  // this is necessary because users have different levels of authorization
+  // depending on their role in the class where the launch initiated
+  console.log(request.session)
+  if (request.session.auth) {
+    request.session.auth = null
+  }
+
+  // check if user already esists, otherwise create user
+  const userEmail = request.body.lis_person_contact_email_primary
+  try {
+    const user = await User.findOne({ username: userEmail })
+    if (!user) {
+      const newUser = new User({
+        username: userEmail,
+        university: request.body.oauth_consumer_key,
+      })
+      const savedUser = await newUser.save()
+    }
+
+    // set authorization in cookie with user data
+    request.session.auth = {
+        user: request.body.lis_person_contact_email_primary,
+        roles: request.body.roles,
+        context: request.body.context_id
+        // other data will also be saved here (return url, etc.)
+    }
+
+  } catch (error) {
+    console.log(error)
+    response.status(400).send({ error })
+  }
 
   next()
 }
