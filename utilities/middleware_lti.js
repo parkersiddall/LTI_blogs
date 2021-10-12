@@ -88,12 +88,9 @@ const establish_session = async (request, response, next) => {
       const savedUser = await newUser.save()
     }
 
-    // set authorization in cookie with user data
-    request.session.auth = {
-        user: request.body.lis_person_contact_email_primary,
-        roles: request.body.roles,
-        context: request.body.context_id
-        // other data will also be saved here (return url, etc.)
+    // copy launch data to session
+    for( const [key, val] of Object.entries(request.body)) {
+      request.session[key] = val
     }
 
   } catch (error) {
