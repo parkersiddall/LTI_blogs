@@ -49,7 +49,8 @@ app.post(
   (request, response) => {
     response.render("lti_launch", {
       title: "You've launched!",
-      message: JSON.stringify(request.body),
+      message: request.body,
+      returnUrl: request.body.launch_presentation_return_url
     })
   }
 )
