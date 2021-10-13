@@ -4,6 +4,8 @@ const config = require("../utilities/config")
 
 ltiRouter.post(
   "/",
+  middleware_lti.confirm_launch_request,
+  middleware_lti.check_app_parameters,
   middleware_lti.validate_lti_launch,
   middleware_lti.establish_session,
   (request, response) => {

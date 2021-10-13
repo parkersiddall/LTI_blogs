@@ -13,31 +13,35 @@ const User = require("../models/user")
 // check required LTI parameters
 const confirm_launch_request = (request, response, next) => {
   if (request.body.lti_message_type !== "basic-lti-launch-request") {
-    response.render("error", {
+    response.status(400)
+    return response.render("error", {
       errorCode: 400,
       errorMessage: "Invalid LTI launch parameters.",
-      returnUrl: request.body.launch_presentation_return_url
+      returnUrl: request.body.launch_presentation_return_url,
     })
   }
   if (request.body.lti_version !== "LTI-1p0") {
-    response.render("error", {
+    response.status(400)
+    return response.render("error", {
       errorCode: 400,
       errorMessage: "Invalid LTI launch parameters.",
-      returnUrl: request.body.launch_presentation_return_url
+      returnUrl: request.body.launch_presentation_return_url,
     })
   }
   if (!request.body.oauth_consumer_key) {
-    response.render("error", {
+    response.status(400)
+    return response.render("error", {
       errorCode: 400,
       errorMessage: "Invalid LTI launch parameters.",
-      returnUrl: request.body.launch_presentation_return_url
+      returnUrl: request.body.launch_presentation_return_url,
     })
   }
   if (!request.body.resource_link_id) {
-    response.render("error", {
+    response.status(400)
+    return response.render("error", {
       errorCode: 400,
       errorMessage: "Invalid LTI launch parameters.",
-      returnUrl: request.body.launch_presentation_return_url
+      returnUrl: request.body.launch_presentation_return_url,
     })
   }
 
@@ -46,7 +50,6 @@ const confirm_launch_request = (request, response, next) => {
 
 // validate LTI request
 const validate_lti_launch = (request, response, next) => {
-  // get credentials
   const consumer_key = config.KEY
   const consumer_secret = config.SECRET
 
@@ -54,16 +57,18 @@ const validate_lti_launch = (request, response, next) => {
   ltiProvider = new lti.Provider(consumer_key, consumer_secret)
   ltiProvider.valid_request(request, (err, isValid) => {
     if (err) {
-      response.render("error", {
+      response.status(400)
+      return response.render("error", {
         errorCode: 400,
         errorMessage: "LTI launch is not valid.",
-        returnUrl: request.body.launch_presentation_return_url
+        returnUrl: request.body.launch_presentation_return_url,
       })
     } else if (!isValid) {
-      response.render("error", {
+      response.status(400)
+      return response.render("error", {
         errorCode: 400,
         errorMessage: "LTI launch is not valid.",
-        returnUrl: request.body.launch_presentation_return_url
+        returnUrl: request.body.launch_presentation_return_url,
       })
     }
   })
@@ -71,20 +76,39 @@ const validate_lti_launch = (request, response, next) => {
   next()
 }
 
-// check that application-specific parameters are present
+// check that application-specific parameters are needed for 
+// general functionality of this app
 const check_app_parameters = (request, response, next) => {
-  // the following are needed for general functionality
   if (!request.body.roles) {
-    response.status(400).send({ error: "Error with roles" })
+    response.status(400)
+    return response.render("error", {
+      errorCode: 400,
+      errorMessage: "LTI launch is not valid. Roles are missing.",
+      returnUrl: request.body.launch_presentation_return_url,
+    })
   }
   if (!request.body.lis_person_contact_email_primary) {
-    response.status(400).send({ error: "Error with user email" })
+    response.status(400)
+    return response.render("error", {
+      errorCode: 400,
+      errorMessage: "LTI launch is not valid. Email is missing.",
+      returnUrl: request.body.launch_presentation_return_url,
+    })
   }
   if (!request.body.context_id) {
-    response.status(400).send({ error: "Error with context_id" })
+    response.status(400)
+    return response.render("error", {
+      errorCode: 400,
+      errorMessage: "LTI launch is not valid. Context ID is missing.",
+      returnUrl: request.body.launch_presentation_return_url,
+    })
   }
   if (!request.body.context_label) {
-    response.status(400).send({ error: "Error with context_label" })
+    return response.render("error", {
+      errorCode: 400,
+      errorMessage: "LTI launch is not valid. Context label is missing.",
+      returnUrl: request.body.launch_presentation_return_url,
+    })
   }
 
   next()
@@ -95,7 +119,6 @@ const establish_session = async (request, response, next) => {
   // check any previous auth data from this site, clear it
   // this is necessary because users have different levels of authorization
   // depending on their role in the class where the launch initiated
-  console.log(request.session)
   if (request.session.auth) {
     request.session.auth = null
   }
@@ -112,14 +135,17 @@ const establish_session = async (request, response, next) => {
       const savedUser = await newUser.save()
     }
 
-    
     // copy launch data to session
     request.session.auth = request.body
-    console.log(request.session)
-
+    
   } catch (error) {
     console.log(error)
-    response.status(400).send({ error })
+    response.status(500)
+    return response.render("error", {
+      errorCode: 500,
+      errorMessage: "Internal server error.",
+      returnUrl: request.body.launch_presentation_return_url,
+    })
   }
 
   next()
