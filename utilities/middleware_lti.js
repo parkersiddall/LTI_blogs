@@ -13,16 +13,32 @@ const User = require("../models/user")
 // check required LTI parameters
 const confirm_launch_request = (request, response, next) => {
   if (request.body.lti_message_type !== "basic-lti-launch-request") {
-    response.status(400).send({ error: "Error with lti_message_type" })
+    response.render("error", {
+      errorCode: 400,
+      errorMessage: "Invalid LTI launch parameters.",
+      returnUrl: request.body.launch_presentation_return_url
+    })
   }
   if (request.body.lti_version !== "LTI-1p0") {
-    response.status(400).send({ error: "Error with lti_version" })
+    response.render("error", {
+      errorCode: 400,
+      errorMessage: "Invalid LTI launch parameters.",
+      returnUrl: request.body.launch_presentation_return_url
+    })
   }
   if (!request.body.oauth_consumer_key) {
-    response.status(400).send({ error: "Error with oauth_consumer_key" })
+    response.render("error", {
+      errorCode: 400,
+      errorMessage: "Invalid LTI launch parameters.",
+      returnUrl: request.body.launch_presentation_return_url
+    })
   }
   if (!request.body.resource_link_id) {
-    response.status(400).send({ error: "Error with resource_link_id" })
+    response.render("error", {
+      errorCode: 400,
+      errorMessage: "Invalid LTI launch parameters.",
+      returnUrl: request.body.launch_presentation_return_url
+    })
   }
 
   next()
@@ -38,9 +54,17 @@ const validate_lti_launch = (request, response, next) => {
   ltiProvider = new lti.Provider(consumer_key, consumer_secret)
   ltiProvider.valid_request(request, (err, isValid) => {
     if (err) {
-      response.status(400).send({ error: err })
+      response.render("error", {
+        errorCode: 400,
+        errorMessage: "LTI launch is not valid.",
+        returnUrl: request.body.launch_presentation_return_url
+      })
     } else if (!isValid) {
-      response.status(400).send({ error: "LTI request is not valid." })
+      response.render("error", {
+        errorCode: 400,
+        errorMessage: "LTI launch is not valid.",
+        returnUrl: request.body.launch_presentation_return_url
+      })
     }
   })
 
