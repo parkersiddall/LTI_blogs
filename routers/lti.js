@@ -9,7 +9,7 @@ ltiRouter.post(
   (request, response) => {
 
     // render view based on user role
-    if (config.INSTRUCTOR_ROLES.includes(request.session.roles)) {
+    if (config.INSTRUCTOR_ROLES.includes(request.session.auth.roles)) {
       response.render("lti_launch", {
         title: "You've launched!",
         message: request.body,

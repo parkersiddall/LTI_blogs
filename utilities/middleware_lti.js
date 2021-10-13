@@ -112,10 +112,10 @@ const establish_session = async (request, response, next) => {
       const savedUser = await newUser.save()
     }
 
+    
     // copy launch data to session
-    for( const [key, val] of Object.entries(request.body)) {
-      request.session[key] = val
-    }
+    request.session.auth = request.body
+    console.log(request.session)
 
   } catch (error) {
     console.log(error)

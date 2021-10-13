@@ -47,11 +47,8 @@ app.use("/lti", ltiRouter)
 // test endpoint for developing pug templates
 app.get(
   "/test", (request, response) => {
-    response.render("test", {
-      title: "You've launched!",
-      message: request.body,
-      returnUrl: request.body.launch_presentation_return_url
-    })
+    console.log(request.session)
+    response.status(404).send({ error: "This was just a test" })
   }
 )
 
