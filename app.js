@@ -1,10 +1,10 @@
 const express = require("express")
 const pug = require("pug")
 const morganBody = require("morgan-body")
-const middleware_lti = require("./utilities/middleware_lti")
 const mongoose = require("mongoose")
 const config = require("./utilities/config")
 const session = require('express-session')
+const ltiRouter = require("./routers/lti")
 
 const url = config.MONGO_URL
 
@@ -37,33 +37,12 @@ app.use(session({
   }
 }))
 
-// routes
+// routes & routers
 app.get("/", (request, response) => {
   response.send("<h1>Hello World, this is LTI 1.1</h1>")
 })
 
-app.post(
-  "/lti",
-  middleware_lti.validate_lti_launch,
-  middleware_lti.establish_session,
-  (request, response) => {
-
-    // render view based on user role
-    if (config.INSTRUCTOR_ROLES.includes(request.session.roles)) {
-      response.render("lti_launch", {
-        title: "You've launched!",
-        message: request.body,
-        returnUrl: request.body.launch_presentation_return_url
-      })
-    } else {
-      response.render("error", {
-        errorCode: 403,
-        errorMessage: "Your role is not authorized to see this page.",
-        returnUrl: request.body.launch_presentation_return_url
-      })
-    }
-  }
-)
+app.use("/lti", ltiRouter)
 
 // test endpoint for developing pug templates
 app.get(
