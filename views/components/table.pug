@@ -1,0 +1,16 @@
+.container.p-3
+  .row 
+    .col-12 
+      h5 My Blogs
+    .col-12 
+      table.table.table-hover
+        thead.table-primary
+          tr 
+            th(scope="col") Date Created
+            th(scope="col") Title
+            th(scope="col") Views
+            th(scope="col") Comments
+            th(scope="col") Actions
+        tbody
+          each item in blogs
+            include table_row.pug

@@ -1,0 +1,29 @@
+html
+  head
+    title My Blogs
+    link(
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+    )
+    script(
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous" 
+    )
+  body
+    nav.navbar.navbar-dark.bg-dark 
+      .container-fluid 
+        h1.navbar-brand LTI Blogs
+        a.btn.btn-sm.btn-outline-light(href= session.launch_presentation_return_url ) Back to Blackboard 
+
+    .container.p-3
+      .row 
+        .col-12
+          .card.bg-light
+            h5.card-header= 'Welcome, ' + session.lis_person_name_full + '!' 
+            .card-body 
+              h5.card-title How to use LTI Blogs 
+              p.card-text LTI Blogs allows you to write and share blogs across classes. Comments posted by students will be visible to all those reading the blog, regardless of the class that the student is enrolled in. This allows students to communicate with other students in different class groups of the same course.
+              a.btn.btn-primary(href="#") Create blog
+
+    include components/table.pug

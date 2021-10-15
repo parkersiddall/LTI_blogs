@@ -5,6 +5,7 @@ const mongoose = require("mongoose")
 const config = require("./utilities/config")
 const session = require('express-session')
 const ltiRouter = require("./routers/lti")
+const samples = require("./utilities/samples")  // resources for testing without db
 
 const url = config.MONGO_URL
 
@@ -47,8 +48,10 @@ app.use("/lti", ltiRouter)
 // test endpoint for developing pug templates
 app.get(
   "/test", (request, response) => {
-    console.log(request.session)
-    response.status(404).send({ error: "This was just a test" })
+    response.render("blogs", {
+      session: samples.session_auth,
+      blogs: samples.blogs
+    })
   }
 )
 

@@ -1,6 +1,7 @@
 const ltiRouter = require('express').Router()
 const middleware_lti = require("../utilities/middleware_lti")
 const config = require("../utilities/config")
+const samples = require("../utilities/samples")
 
 ltiRouter.post(
   "/",
@@ -12,10 +13,9 @@ ltiRouter.post(
 
     // render view based on user role
     if (config.INSTRUCTOR_ROLES.includes(request.session.auth.roles)) {
-      response.render("lti_launch", {
-        title: "You've launched!",
-        message: request.body,
-        returnUrl: request.body.launch_presentation_return_url
+      response.render("blogs", {
+        session: request.session.auth,
+        blogs: samples.blogs
       })
     } else {
       response.render("error", {
