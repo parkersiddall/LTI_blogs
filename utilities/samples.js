@@ -1,6 +1,6 @@
 const blogs = [
   {
-    id: 1,
+    id: "1",
     dateCreated: "July 4, 1776",
     creator: "Thomas Jefferson",
     title: "Declaration of Independence",
@@ -9,7 +9,7 @@ const blogs = [
     comments: 5
   },
   {
-    id: 2,
+    id: "2",
     dateCreated: "November 19, 1863",
     creator: "Abraham Lincoln",
     title: "Gettysburg Address",
@@ -18,7 +18,7 @@ const blogs = [
     comments: 17
   },
   {
-    id: 3,
+    id: "3",
     dateCreated: "August 28, 1963",
     creator: "Martin Luther King Jr.",
     title: "I Have a Dream",

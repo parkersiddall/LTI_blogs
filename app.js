@@ -6,6 +6,11 @@ const config = require("./utilities/config")
 const session = require('express-session')
 const ltiRouter = require("./routers/lti")
 const samples = require("./utilities/samples")  // resources for testing without db
+const { request } = require("express")
+const middleware_lti = require("./utilities/middleware_lti")
+const uuid = require("uuid")
+const oauthSignature = require("oauth-signature")
+const replaceall = require("replaceall")
 
 const url = config.MONGO_URL
 
@@ -44,6 +49,69 @@ app.get("/", (request, response) => {
 })
 
 app.use("/lti", ltiRouter)
+
+app.post("/CIMrequest",
+  middleware_lti.confirm_launch_request,
+  middleware_lti.check_app_parameters,
+  middleware_lti.validate_lti_launch,
+  middleware_lti.establish_session,
+  (request, response) => {
+    response.render("blogs", {
+      session: request.session.auth,
+      blogs: samples.blogs
+    })
+})
+
+app.post("/CIMRequestConfirmation",
+  (request, response) => {
+
+    // pull out id from post
+    const blog = samples.blogs.find(x => x.id === request.body.id)
+
+    // construct content_items
+    const content_item = {
+      "@context" : "http://purl.imsglobal.org/ctx/lti/v1/ContentItem",
+      "@graph" : [
+        { "@type" : "LtiLinkItem",
+          "url" : `http://localhost/lti/blog/${blog.id}`,
+          "mediaType" : "application/vnd.ims.lti.v1.ltilink",
+          "title" : blog.title,
+          "text" : "Click this link to view the blog and comments.",
+        }
+      ]
+    }
+
+    var content_item_string = JSON.stringify(content_item)
+    //var content_item_string = replaceall("\"", "&quot;", content_item_string)
+    //var content_item_string = replaceall("\'", "&#39;", content_item_string)
+
+    // construct params
+    var params = {}
+    params.lti_message_type = "ContentItemSelection"
+    params.lti_version = "LTI-1p0"
+    params.content_items = content_item_string
+    params.data = request.session.auth.data
+    params.oauth_version = "1.0"
+    params.oauth_nonce = uuid.v1()
+    params.oauth_timestamp = Math.floor(Date.now() / 1000)
+    params.oauth_consumer_key = config.KEY
+    params.oauth_callback = "about:blank"
+    params.oauth_signature_method = "HMAC-SHA1"
+
+    // make signature, add it to params
+    const httpMethod = "POST"
+    const url = request.session.auth.content_item_return_url
+    const secret = config.SECRET
+    token = null
+    const signature = oauthSignature.generate(httpMethod, url, params, secret, token, 
+      { encodeSignature: false});
+    params.oauth_signature = signature
+
+    response.render("cimrequestconfirm", {
+      url: url,
+      params: params
+    })
+})
 
 // test endpoint for developing pug templates
 app.get(

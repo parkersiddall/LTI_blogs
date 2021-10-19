@@ -12,7 +12,8 @@ const User = require("../models/user")
 
 // check required LTI parameters
 const confirm_launch_request = (request, response, next) => {
-  if (request.body.lti_message_type !== "basic-lti-launch-request") {
+  const messageTypes = ["basic-lti-launch-request", "ContentItemSelectionRequest"]
+  if (!messageTypes.includes(request.body.lti_message_type)) {  // TODO: add basic launch "basic-lti-launch-request"
     response.status(400)
     return response.render("error", {
       errorCode: 400,
@@ -36,7 +37,8 @@ const confirm_launch_request = (request, response, next) => {
       returnUrl: request.body.launch_presentation_return_url,
     })
   }
-  if (!request.body.resource_link_id) {
+
+  if (request.body.lti_message_type == "basic-lti-launch-request" && !request.body.resource_link_id) {
     response.status(400)
     return response.render("error", {
       errorCode: 400,
@@ -53,25 +55,31 @@ const validate_lti_launch = (request, response, next) => {
   const consumer_key = config.KEY
   const consumer_secret = config.SECRET
 
-  // initiate provider and validate
-  ltiProvider = new lti.Provider(consumer_key, consumer_secret)
-  ltiProvider.valid_request(request, (err, isValid) => {
-    if (err) {
-      response.status(400)
-      return response.render("error", {
-        errorCode: 400,
-        errorMessage: "LTI launch is not valid.",
-        returnUrl: request.body.launch_presentation_return_url,
-      })
-    } else if (!isValid) {
-      response.status(400)
-      return response.render("error", {
-        errorCode: 400,
-        errorMessage: "LTI launch is not valid.",
-        returnUrl: request.body.launch_presentation_return_url,
-      })
-    }
-  })
+  // initiate provider and validate for basic launch
+  // library does work for CIMRequests...
+  if (request.body.lti_message_type !== "ContentItemSelectionRequest") {
+    ltiProvider = new lti.Provider(consumer_key, consumer_secret)
+    ltiProvider.valid_request(request, request.body, (err, isValid) => {
+      if (err) {
+        console.log(err)
+        response.status(400)
+        return response.render("error", {
+          errorCode: 400,
+          errorMessage: "LTI launch has an error",
+          returnUrl: request.body.launch_presentation_return_url,
+        })
+      } 
+      console.log(err, isValid)
+      if (!isValid) {
+        response.status(400)
+        return response.render("error", {
+          errorCode: 400,
+          errorMessage: "LTI launch is not valid.",
+          returnUrl: request.body.launch_presentation_return_url,
+        })
+      }
+    })
+  }
 
   next()
 }

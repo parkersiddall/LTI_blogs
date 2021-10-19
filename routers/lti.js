@@ -27,4 +27,17 @@ ltiRouter.post(
   }
 )
 
+// handles lti launch to view a blog after deep link clicked
+ltiRouter.post("/blog/:id", 
+middleware_lti.confirm_launch_request,
+middleware_lti.check_app_parameters,
+middleware_lti.validate_lti_launch,
+middleware_lti.establish_session,
+(request, response) => {
+  const blog = samples.blogs.find(x => x.id === request.params.id)
+  response.render("blog", {
+    blog: blog
+  })
+})
+
 module.exports = ltiRouter

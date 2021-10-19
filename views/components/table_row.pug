@@ -3,4 +3,8 @@ tr
   td= item.title
   td= item.views
   td= item.comments
-  td XYZ
+  td
+    form(action="/CIMRequestConfirmation" method="POST")
+      input(type="hidden" name="id" value= item.id)
+      if session.lti_message_type == "ContentItemSelectionRequest"
+        button.btn.btn-primary.btn-sm(type="submit") Deep link  
