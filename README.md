@@ -5,11 +5,13 @@ This is a simple blog app to test out some of the features of LTI 1.1 such as:
 
 Course instructors will be able to launch the tool and create blog posts. Then they will be able to insert a deep link to a specific post within their course for students to access and comment on.
 
-## endpoints
+## routes
 - GET `/` will return a landing page where a user will be able to register for a key secret
 - POST `/lti` is used for a basic launch. Only the Instructor role is authorized for this. If successful, the user will see a list of their blogs and have the option of creating a new blog or viewing existing blogs.
 - POST `/lti/blog/<blog id>` used for basic lti launches that open up an individual blog. These links are typically going to be inserted into the course content via deep linking.
+- GET `/lti/blog/<blog id>` used to display a blog without when the user has already launched into the TP
 - POST `/CIMrequest` used to for LTI Content Item Message request. Presents user with a list of their blog (same view as /lti) but each blog will have a button to deep link the blog to the course.
+- GET `/CIMRequestConfirmation/<id>` route used once user has chosen deep linking content from /CIMrequest. This view prepares the form that will be submitted back to TC.
 - GET `/test` will eventually be removed. Currently used to experiment with pug templates...
 
 ## Resources and References

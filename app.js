@@ -62,11 +62,12 @@ app.post("/CIMrequest",
     })
 })
 
-app.post("/CIMRequestConfirmation",
+// TODO: add authentication middleware to this route
+app.get("/CIMRequestConfirmation/:id",
   (request, response) => {
 
     // pull out id from post
-    const blog = samples.blogs.find(x => x.id === request.body.id)
+    const blog = samples.blogs.find(x => x.id === request.params.id)
 
     // construct content_items
     const content_item = {
@@ -111,6 +112,15 @@ app.post("/CIMRequestConfirmation",
       url: url,
       params: params
     })
+})
+
+// returns blog view without LTI launch checks
+// TODO: add session authentication middleware
+app.get("/blog/:id", (request, response) => {
+  const blog = samples.blogs.find(x => x.id === request.params.id)
+  response.render("blog", {
+    blog: blog
+  })
 })
 
 // test endpoint for developing pug templates
