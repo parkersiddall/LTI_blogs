@@ -36,7 +36,8 @@ middleware_lti.establish_session,
 (request, response) => {
   const blog = samples.blogs.find(x => x.id === request.params.id)
   response.render("blog", {
-    blog: blog
+    blog: blog,
+    comments: samples.comments  //TODO: to replace once implemented
   })
 })
 

@@ -25,7 +25,34 @@ const blogs = [
     content: "I have a dream that one day this nation will rise up and live out the true meaning of its creed: We hold these truths to be self-evident, that all men are created equal.",
     views: 25,
     comments: 8
+  }
+]
+
+const comments = [
+  {
+    id: "1",
+    dateCreated: "July 4, 1776",
+    creator: "John Smith",
+    content: "this is the first comment",
+    up: 34,
+    down: 5
   },
+  {
+    id: "2",
+    dateCreated: "November 19, 1863",
+    creator: "Abraham Lincoln",
+    content: "this is the second comment",
+    up: 50,
+    down: 17
+  },
+  {
+    id: "3",
+    dateCreated: "August 28, 1963",
+    creator: "Martin Luther King Jr.",
+    content: "This is the third comment",
+    up: 25,
+    down: 8
+  }
 ]
 
 const session_auth = {
@@ -70,4 +97,4 @@ const session_auth = {
   ext_launch_presentation_css_url: 'https://bb-test.unibocconi.it/common/shared.css,https://bb-test.unibocconi.it/themes/as_2015/theme.css'
 }
 
-module.exports = {blogs, session_auth}
+module.exports = {blogs, comments, session_auth}

@@ -1,6 +1,6 @@
 html
   head
-    title= blog.title
+    title My Blogs
     link(
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
@@ -10,6 +10,35 @@ html
       integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
       crossorigin="anonymous" 
     )
+  nav.navbar.navbar-dark.bg-dark 
+    .container-fluid 
+      h1.navbar-brand LTI Blogs
+
   body
-    h1= blog.title
-    p= blog.content
+    .container.p-3
+      .row 
+        .col-12
+          .text-center.my-3
+            h1.display-6= blog.title
+            i.font-light= "By " + blog.creator
+          hr.my-3
+          p= blog.content
+          br  
+      .row
+        .col-12 
+          ul.nav.nav-tabs(id="myTab" role="tablist")
+            li.nav-item(role="presentation")
+              button.nav-link.active(id="comments-tab" data-bs-toggle="tab" data-bs-target="#comments" type="button" role="tab" aria-controls="comments" aria-selected="true") Comments
+            li.nav-item(role="presentation")
+              button.nav-link(id="new-comment-tab" data-bs-toggle="tab" data-bs-target="#new-comment" type="button" role="tab" aria-controls="new-comment" aria-selected="false") Add Comment
+          .tab-content(id="myTabContent")
+            .tab-pane.fade.show.active(id="comments" role="tabpanel" aria-labelledby="comments-tab")
+              .m-3 
+                each comment in comments
+                  include components/comment.pug
+            .tab-pane.fade.show(id="new-comment" role="tabpanel" aria-labelledby="new-comment-tab")
+              form.m-3
+                label.form-label(for="comment") Write your comment below
+                textarea.form-control(type="textarea" name="comment" id="comment" rows="3")
+                br
+                button.btn.btn-primary(type="submit") Submit

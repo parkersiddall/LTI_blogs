@@ -119,16 +119,17 @@ app.get("/CIMRequestConfirmation/:id",
 app.get("/blog/:id", (request, response) => {
   const blog = samples.blogs.find(x => x.id === request.params.id)
   response.render("blog", {
-    blog: blog
+    blog: blog,
+    comments: samples.comments
   })
 })
 
 // test endpoint for developing pug templates
 app.get(
   "/test", (request, response) => {
-    response.render("blogs", {
-      session: samples.session_auth,
-      blogs: samples.blogs
+    response.render("blog", {
+      blog: samples.blogs[0],
+      comments: samples.comments
     })
   }
 )
