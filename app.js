@@ -5,6 +5,7 @@ const mongoose = require("mongoose")
 const config = require("./utilities/config")
 const session = require('express-session')
 const ltiRouter = require("./routers/lti")
+const apiRouter = require("./routers/api")
 const samples = require("./utilities/samples")  // resources for testing without db
 const { request } = require("express")
 const middleware_lti = require("./utilities/middleware_lti")
@@ -49,6 +50,7 @@ app.get("/", (request, response) => {
 })
 
 app.use("/lti", ltiRouter)
+app.use("/api", apiRouter)
 
 app.post("/CIMrequest",
   middleware_lti.confirm_launch_request,

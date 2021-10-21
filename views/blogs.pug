@@ -21,22 +21,22 @@ html
               h5.card-title How to use LTI Blogs 
               p.card-text LTI Blogs allows you to write and share blogs across classes. Comments posted by students will be visible to all those reading the blog, regardless of the class that the student is enrolled in. This allows students to communicate with other students in different class groups of the same course.
               button.btn.btn-primary(type="button" data-toggle="modal" data-target="#createBlogModal") Create blog
-              .modal.fade(id="createBlogModal" tabindex="-1" aria-hidden="true" role="dialog")
-                .modal-dialog.modal-dialog-centered(role="document")
-                  .modal-content 
-                    .modal-header
-                      h5.modal-title Create Blog 
-                    .modal-body
-                      form(action="/createblog" method="POST")
-                        .form-group
-                          label(for="title") Title
-                          input.form-control(id="title" name="title")
-                        br
-                        .form-group 
-                          textarea.form-control(id="content" name="content" cols="30" rows="10") 
-                    .modal-footer 
-                      button.btn.btn-secondary(type="button" data-dismiss="modal") Close
-                      button.btn.btn-primary(type="submit" data-dismiss="modal") Save
+              form(action="/api/createblog" method="POST")
+                .modal.fade(id="createBlogModal" tabindex="-1" aria-hidden="true" role="dialog")
+                  .modal-dialog.modal-dialog-centered(role="document")
+                    .modal-content 
+                      .modal-header
+                        h5.modal-title Create Blog 
+                      .modal-body
+                          .form-group
+                            label(for="title") Title
+                            input.form-control(id="title" name="title")
+                          br
+                          .form-group 
+                            textarea.form-control(id="content" name="content" cols="30" rows="10") 
+                      .modal-footer 
+                        button.btn.btn-secondary(type="button" data-dismiss="modal") Close
+                        button.btn.btn-primary(type="submit") Save
 
     include components/table.pug
 
