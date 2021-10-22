@@ -11,4 +11,8 @@ apiRouter.delete("/blog", (request, response) => {
   // delete blogs when send via ajax
 })
 
+apiRouter.post("/comment", (request, response) => {
+  // collect and save new comments when send via ajax
+})
+
 module.exports = apiRouter
