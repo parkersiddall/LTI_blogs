@@ -22,7 +22,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
     .then((result) => {
       const closeNewBlogModal = document.getElementById('clodeNewBlogModal')
       closeNewBlogModal.click()
-      window.location.replace(`/blog/${result.id}`)
+      window.location.replace(`/blogs/${result.id}`)
     })
     .catch(error => {
       // throw an error pop up

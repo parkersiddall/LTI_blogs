@@ -61,25 +61,22 @@ app.post("/CIMrequest",
   middleware_lti.validate_lti_launch,
   middleware_lti.establish_session,
   (request, response) => {
-    response.render("blogs", {
-      session: request.session.auth,
-      blogs: samples.blogs
-    })
+    response.redirect(301, "/blogs")
 })
 
 // TODO: add authentication middleware to this route
 app.get("/CIMRequestConfirmation/:id",
-  (request, response) => {
+  async (request, response) => {
 
     // pull out id from post
-    const blog = samples.blogs.find(x => x.id === request.params.id)
+    const blog = await Blog.findById(request.params.id)
 
     // construct content_items
     const content_item = {
       "@context" : "http://purl.imsglobal.org/ctx/lti/v1/ContentItem",
       "@graph" : [
         { "@type" : "LtiLinkItem",
-          "url" : `http://localhost/lti/blog/${blog.id}`,
+          "url" : `http://localhost/lti/blogs/${blog.id}`,
           "mediaType" : "application/vnd.ims.lti.v1.ltilink",
           "title" : blog.title,
           "text" : "Click this link to view the blog and comments.",
@@ -119,9 +116,30 @@ app.get("/CIMRequestConfirmation/:id",
     })
 })
 
-// returns blog view without LTI launch checks
 // TODO: add session authentication middleware
-app.get("/blog/:id", async (request, response) => {
+app.get("/blogs", async (request, response) => {
+  try {
+    const user =  await User.findOne(request.session.user)
+    console.log(user)
+
+    const blogs = await Blog.find({creator: user})
+    console.log(blogs)
+
+    response.render("blogs", {
+      session: request.session.auth,
+      blogs: blogs
+    })
+  } catch (e) {
+    return response.render("error", {
+      errorCode: 404,
+      errorMessage: e.message,
+      returnUrl: request.body.launch_presentation_return_url,
+    })
+  }
+})
+// returns blog view without LTI launch checks
+// TODO: add session authentication middleware, only creator will be able to see their blog
+app.get("/blogs/:id", async (request, response) => {
   try {
     const blog =  await Blog.findById(request.params.id)
     blog.creator = await User.findById(blog.creator)
