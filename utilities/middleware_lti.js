@@ -118,6 +118,13 @@ const check_app_parameters = (request, response, next) => {
       returnUrl: request.body.launch_presentation_return_url,
     })
   }
+  if (!request.body.lis_person_name_full) {
+    return response.render("error", {
+      errorCode: 400,
+      errorMessage: "LTI launch is not valid. Full name is missing.",
+      returnUrl: request.body.launch_presentation_return_url,
+    })
+  }
 
   next()
 }
@@ -134,12 +141,14 @@ const establish_session = async (request, response, next) => {
   // check if user already esists, otherwise create user
   const userEmail = request.body.lis_person_contact_email_primary
   const university = request.body.oauth_consumer_key
+  const fullName = request.body.lis_person_name_full
   try {
     var user = await User.findOne({ username: userEmail, university: university })
     if (!user) {
       const newUser = new User({
         username: userEmail,
         university: university,
+        fullName: fullName
       })
       user = await newUser.save()
     }

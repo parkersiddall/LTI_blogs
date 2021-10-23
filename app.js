@@ -12,6 +12,8 @@ const middleware_lti = require("./utilities/middleware_lti")
 const uuid = require("uuid")
 const oauthSignature = require("oauth-signature")
 const replaceall = require("replaceall")
+const Blog = require('./models/blog')
+const User = require("./models/user")
 
 const url = config.MONGO_URL
 
@@ -119,12 +121,21 @@ app.get("/CIMRequestConfirmation/:id",
 
 // returns blog view without LTI launch checks
 // TODO: add session authentication middleware
-app.get("/blog/:id", (request, response) => {
-  const blog = samples.blogs.find(x => x.id === request.params.id)
-  response.render("blog", {
-    blog: blog,
-    comments: samples.comments
-  })
+app.get("/blog/:id", async (request, response) => {
+  try {
+    const blog =  await Blog.findById(request.params.id)
+    blog.creator = await User.findById(blog.creator)
+    response.render("blog", {
+      blog: blog,
+      comments: samples.comments
+    })
+  } catch {
+    return response.render("error", {
+      errorCode: 404,
+      errorMessage: "Blog not found.",
+      returnUrl: request.body.launch_presentation_return_url,
+    })
+  }
 })
 
 // test endpoint for developing pug templates

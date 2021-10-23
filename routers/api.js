@@ -3,7 +3,7 @@ const config = require("../utilities/config")
 const samples = require("../utilities/samples")
 const Blog = require('../models/blog')
 
-apiRouter.post("/blog", (request, response) => {
+apiRouter.post("/blog", async (request, response) => {
   // collect and save new blogs when send via ajax
   console.log("user: ", request.session.user)
   try {
@@ -16,11 +16,9 @@ apiRouter.post("/blog", (request, response) => {
       comments: 0
     })
 
-    let savedBlog = newBlog.save()
-    .then(res => {
-      response.json(res)
-      // redirect to blogs page via GET
-    })
+    let savedBlog = await newBlog.save()
+    response.json(savedBlog)
+
   } catch (error) {
     response.status(500)
     response.json({error})
