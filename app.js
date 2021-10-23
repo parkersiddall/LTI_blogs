@@ -31,6 +31,7 @@ app.use(express.json())
 app.use(express.urlencoded())
 app.set("views", "./views")
 app.set("view engine", "pug")
+app.use("/static", express.static("public"))
 
 // middleware
 morganBody(app)

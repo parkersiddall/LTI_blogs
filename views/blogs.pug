@@ -21,7 +21,7 @@ html
               h5.card-title How to use LTI Blogs 
               p.card-text LTI Blogs allows you to write and share blogs across classes. Comments posted by students will be visible to all those reading the blog, regardless of the class that the student is enrolled in. This allows students to communicate with other students in different class groups of the same course.
               button.btn.btn-primary(type="button" data-toggle="modal" data-target="#createBlogModal") Create blog
-              form(action="/api/createblog" method="POST")
+              form(action="#" method="POST" id="newBlogForm")
                 .modal.fade(id="createBlogModal" tabindex="-1" aria-hidden="true" role="dialog")
                   .modal-dialog.modal-dialog-centered(role="document")
                     .modal-content 
@@ -30,12 +30,12 @@ html
                       .modal-body
                           .form-group
                             label(for="title") Title
-                            input.form-control(id="title" name="title")
+                            input.form-control(id="newBlogTitle" name="title" required)
                           br
                           .form-group 
-                            textarea.form-control(id="content" name="content" cols="30" rows="10") 
+                            textarea.form-control(id="newBlogContent" name="content" cols="30" rows="10" required) 
                       .modal-footer 
-                        button.btn.btn-secondary(type="button" data-dismiss="modal") Close
+                        button.btn.btn-secondary(type="button" data-dismiss="modal" id="clodeNewBlogModal") Close
                         button.btn.btn-primary(type="submit") Save
 
     include components/table.pug
@@ -54,4 +54,8 @@ script(
   src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
   integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
   crossorigin="anonymous"
+)
+
+script(
+  src="/static/services.js"
 )

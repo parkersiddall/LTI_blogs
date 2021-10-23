@@ -133,18 +133,20 @@ const establish_session = async (request, response, next) => {
 
   // check if user already esists, otherwise create user
   const userEmail = request.body.lis_person_contact_email_primary
+  const university = request.body.oauth_consumer_key
   try {
-    const user = await User.findOne({ username: userEmail })
+    var user = await User.findOne({ username: userEmail, university: university })
     if (!user) {
       const newUser = new User({
         username: userEmail,
-        university: request.body.oauth_consumer_key,
+        university: university,
       })
-      const savedUser = await newUser.save()
+      user = await newUser.save()
     }
 
     // copy launch data to session
     request.session.auth = request.body
+    request.session.user = user
     
   } catch (error) {
     console.log(error)

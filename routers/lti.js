@@ -11,6 +11,9 @@ ltiRouter.post(
   middleware_lti.establish_session,
   (request, response) => {
 
+    // TODO: This endpoint will be used to handle ALL LTI launched. Redirecting to GET endpoints will then be done
+    // base on roles and lti messages. The GET enpoints will then display the user with the views.
+
     // render view based on user role
     if (config.INSTRUCTOR_ROLES.includes(request.session.auth.roles)) {
       response.render("blogs", {
