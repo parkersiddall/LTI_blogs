@@ -17,7 +17,11 @@ apiRouter.post("/blog", async (request, response) => {
     })
 
     let savedBlog = await newBlog.save()
-    response.json(savedBlog)
+    const responseData = {
+      blog: savedBlog,
+      ltiMessageType: request.session.auth.lti_message_type
+    }
+    response.json(responseData)
 
   } catch (error) {
     response.status(500)
