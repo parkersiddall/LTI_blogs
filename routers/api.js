@@ -1,11 +1,11 @@
-const apiRouter = require('express').Router()
+const apiRouter = require("express").Router()
 const config = require("../utilities/config")
 const samples = require("../utilities/samples")
-const Blog = require('../models/blog')
+const Blog = require("../models/blog")
+const User = require("../models/user")
 
 apiRouter.post("/blog", async (request, response) => {
   // collect and save new blogs when send via ajax
-  console.log("user: ", request.session.user)
   try {
     const newBlog = new Blog({
       dateCreated: new Date(),
@@ -29,8 +29,27 @@ apiRouter.post("/blog", async (request, response) => {
   }
 })
 
-apiRouter.delete("/blog", (request, response) => {
+apiRouter.delete("/blog/:id", async (request, response) => {
   // delete blogs when send via ajax
+  try {
+    const blog = await Blog.findById(request.params.id)
+    const creator = await User.findOne({
+      username: request.session.auth.lis_person_contact_email_primary,
+      university: request.session.auth.oauth_consumer_key
+    })
+    console.log(blog, creator)
+    if (blog.creator._id.toString() != creator._id.toString()) {
+      response.status(404)
+      response.json({"Unauthorized": "You are not the creator of this blog."})
+      response.end()
+    }
+    const result = await Blog.findByIdAndDelete(request.params.id)
+    response.status(204).end()
+
+  } catch (error) {
+    response.status(500)
+    response.json({error: error.message})
+  }
 })
 
 apiRouter.post("/comment", (request, response) => {

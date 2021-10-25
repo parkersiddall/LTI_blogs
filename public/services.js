@@ -23,6 +23,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
       insertTabeRow(result)
       const closeNewBlogModal = document.getElementById('clodeNewBlogModal')
       closeNewBlogModal.click()
+      newBlogForm.reset()
     })
     .catch(error => {
       // throw an error pop up
@@ -30,9 +31,44 @@ window.addEventListener('DOMContentLoaded', (event) => {
     })
   })
 
-  // functions to manipulate DOM
+  // handle delete of blog button
+  var deleteButtons = document.getElementsByClassName("deleteButton")
+  deleteButtons = Array.from(deleteButtons)
+  deleteButtons.forEach((deleteButton) => {
+    deleteButton.addEventListener('click', (event) => {
+      processDelete(event)
+    })
+  })
+
+  // functions
+  function processDelete(event) {
+    e = event.target
+    while (e.id == "") {
+      e = e.parentNode
+    }
+    var elementId = e.id
+    var blogId = elementId.substring(17)
+
+    fetch(`/api/blog/${blogId}`, {
+      method: 'DELETE',
+      headers: {'Content-Type': 'application/json'}
+    })
+    .then(response => {
+      if (response.status != 204) {
+        throw "Response is not 204!"
+      }
+      var row = document.getElementById(`tableRow-${blogId}`)
+      row.remove()
+    })
+    .catch(error => {
+      // throw an error pop up
+      console.log(error)
+    })
+  }
+  
   function insertTabeRow(responseData) {
     var newTableRow = document.createElement('tr')
+    newTableRow.id = `tableRow-${responseData.blog.id}`
 
     newTableRow.innerHTML = `
       <td scope="row">${responseData.blog.dateCreated}</td>
@@ -49,7 +85,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
               <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"></path>
             </svg>
           </a>
-          <button class="btn btn-outline-secondary" type="button">
+          <button class="btn btn-outline-secondary deleteButton" type="button" id="deleteBlogButton-${responseData.blog.id}">
             <svg class="bi bi-trash"xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
               <path
                 d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z">
@@ -64,11 +100,14 @@ window.addEventListener('DOMContentLoaded', (event) => {
     `
     var table = document.getElementById('table')
     table.appendChild(newTableRow)
+    var newDeleteButton = document.getElementById(`deleteBlogButton-${responseData.blog.id}`)
+    newDeleteButton.addEventListener('click', (event) => {
+      processDelete(event)
+    })
 
     // add CIMRequest button if necessary
     if (responseData.ltiMessageType == "ContentItemSelectionRequest") {
       var actionButtons = document.getElementById(`buttonGroup-${responseData.blog.id}`)
-      console.log(actionButtons)
       var CIMRequestButton = document.createElement('a')
       CIMRequestButton.classList.add("btn", "btn-outline-secondary")
       CIMRequestButton.href = `/CIMRequestConfirmation/${responseData.blog.id}`
