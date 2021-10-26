@@ -4,6 +4,7 @@ const config = require("../utilities/config")
 const samples = require("../utilities/samples")
 const Blog = require("../models/blog")
 const User = require("../models/user")
+const Comment = require("../models/comment")
 
 ltiRouter.post(
   "/",
@@ -39,16 +40,20 @@ async (request, response) => {
   try {
     const blog =  await Blog.findById(request.params.id)
     blog.creator = await User.findById(blog.creator)
-
+    const comments = await Comment.find({blog: blog}).populate("creator")
+    response.render("blog", {
+      blog: blog,
+      comments: comments
+    })
     // TODO: add 1 view to blog
 
     response.render("blog", {
       blog: blog,
-      comments: samples.comments
+      comments: comments
     })
   } catch (e) {
     return response.render("error", {
-      errorCode: 404,
+      errorCode: e.code,
       errorMessage: e.message,
       returnUrl: request.body.launch_presentation_return_url,
     })

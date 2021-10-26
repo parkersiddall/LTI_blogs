@@ -14,6 +14,7 @@ const oauthSignature = require("oauth-signature")
 const replaceall = require("replaceall")
 const Blog = require('./models/blog')
 const User = require("./models/user")
+const Comment = require("./models/comment")
 
 const url = config.MONGO_URL
 
@@ -143,11 +144,13 @@ app.get("/blogs/:id", async (request, response) => {
   try {
     const blog =  await Blog.findById(request.params.id)
     blog.creator = await User.findById(blog.creator)
+    const comments = await Comment.find({blog: blog}).populate("creator")
     response.render("blog", {
       blog: blog,
-      comments: samples.comments
+      comments: comments
     })
-  } catch {
+  } catch (error) {
+    console.log(error)
     return response.render("error", {
       errorCode: 404,
       errorMessage: "Blog not found.",
