@@ -9,6 +9,7 @@ https://www.imsglobal.org/learning-tools-interoperability-verifying-launch-messa
 const config = require("./config")
 const lti = require("ims-lti")
 const User = require("../models/user")
+const oauthSignature = require("oauth-signature")
 
 // check required LTI parameters
 const confirm_launch_request = (request, response, next) => {
@@ -54,30 +55,24 @@ const confirm_launch_request = (request, response, next) => {
 const validate_lti_launch = (request, response, next) => {
   const consumer_key = config.KEY
   const consumer_secret = config.SECRET
+  const requestSignature = request.body.oauth_signature
 
-  // initiate provider and validate for basic launch
-  // library does work for CIMRequests...
-  if (request.body.lti_message_type !== "ContentItemSelectionRequest") {
-    ltiProvider = new lti.Provider(consumer_key, consumer_secret)
-    ltiProvider.valid_request(request, request.body, (err, isValid) => {
-      if (err) {
-        console.log(err)
-        response.status(400)
-        return response.render("error", {
-          errorCode: 400,
-          errorMessage: "LTI launch has an error",
-          returnUrl: request.body.launch_presentation_return_url,
-        })
-      } 
-      console.log(err, isValid)
-      if (!isValid) {
-        response.status(400)
-        return response.render("error", {
-          errorCode: 400,
-          errorMessage: "LTI launch is not valid.",
-          returnUrl: request.body.launch_presentation_return_url,
-        })
-      }
+  const params = request.body
+  delete params.oauth_signature
+  const token = null
+  const httpMethod = "POST"
+  const url = request.protocol + "://" + request.get("host") + request.originalUrl
+
+  // generate signature based on params, url, method. Check to see that it matches sig in request.
+  const generatedSignature = oauthSignature.generate(httpMethod, url, params, consumer_secret, token, 
+    { encodeSignature: false});
+
+  if (generatedSignature != requestSignature) {
+    response.status(400)
+    return response.render("error", {
+      errorCode: 400,
+      errorMessage: "LTI launch is not valid.",
+      returnUrl: request.body.launch_presentation_return_url,
     })
   }
 

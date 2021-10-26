@@ -121,10 +121,7 @@ app.get("/CIMRequestConfirmation/:id",
 app.get("/blogs", async (request, response) => {
   try {
     const user =  await User.findOne(request.session.user)
-    console.log(user)
-
     const blogs = await Blog.find({creator: user})
-    console.log(blogs)
 
     response.render("blogs", {
       session: request.session.auth,
