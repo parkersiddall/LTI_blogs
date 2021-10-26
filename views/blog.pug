@@ -10,6 +10,9 @@ html
       integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
       crossorigin="anonymous" 
     )
+    script(
+      src="/static/comment_service.js"
+    )
   nav.navbar.navbar-dark.bg-dark 
     .container-fluid 
       h1.navbar-brand LTI Blogs
@@ -33,12 +36,13 @@ html
               button.nav-link(id="new-comment-tab" data-bs-toggle="tab" data-bs-target="#new-comment" type="button" role="tab" aria-controls="new-comment" aria-selected="false") Add Comment
           .tab-content(id="myTabContent")
             .tab-pane.fade.show.active(id="comments" role="tabpanel" aria-labelledby="comments-tab")
-              .m-3 
+              .m-3(id="commentsContainer")
                 each comment in comments
                   include components/comment.pug
             .tab-pane.fade.show(id="new-comment" role="tabpanel" aria-labelledby="new-comment-tab")
-              form.m-3
+              form.m-3(id="newCommentForm")
                 label.form-label(for="comment") Write your comment below
+                input(type="hidden" id="idSource" value= blog.id)
                 textarea.form-control(type="textarea" name="comment" id="comment" rows="3")
                 br
                 button.btn.btn-primary(type="submit") Submit

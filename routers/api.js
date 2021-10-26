@@ -1,8 +1,7 @@
 const apiRouter = require("express").Router()
-const config = require("../utilities/config")
-const samples = require("../utilities/samples")
 const Blog = require("../models/blog")
 const User = require("../models/user")
+const Comment = require("../models/comment")
 
 apiRouter.post("/blog", async (request, response) => {
   // collect and save new blogs when send via ajax
@@ -52,8 +51,28 @@ apiRouter.delete("/blog/:id", async (request, response) => {
   }
 })
 
-apiRouter.post("/comment", (request, response) => {
+apiRouter.post("/comment/:id", async (request, response) => {
   // collect and save new comments when send via ajax
+  try {
+    const blog = await Blog.findById(request.params.id)
+    const creator = await User.findOne({
+      username: request.session.auth.lis_person_contact_email_primary,
+      university: request.session.auth.oauth_consumer_key
+    })
+    
+    const newComment = new Comment({
+      creator: creator,
+      blog: blog,
+      comment: request.body.comment
+    })
+
+    const result = await newComment.save()
+    response.json(result)
+
+  } catch (error) {
+    response.status(500)
+    response.json({error: error.message})
+  }
 })
 
 module.exports = apiRouter
