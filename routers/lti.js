@@ -1,7 +1,6 @@
 const ltiRouter = require('express').Router()
 const middleware_lti = require("../utilities/middleware_lti")
 const config = require("../utilities/config")
-const samples = require("../utilities/samples")
 const Blog = require("../models/blog")
 const User = require("../models/user")
 const Comment = require("../models/comment")

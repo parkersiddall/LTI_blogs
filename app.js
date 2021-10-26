@@ -1,17 +1,13 @@
 const express = require("express")
-const pug = require("pug")
 const morganBody = require("morgan-body")
 const mongoose = require("mongoose")
 const config = require("./utilities/config")
 const session = require('express-session')
 const ltiRouter = require("./routers/lti")
 const apiRouter = require("./routers/api")
-const samples = require("./utilities/samples")  // resources for testing without db
-const { request } = require("express")
 const middleware_lti = require("./utilities/middleware_lti")
 const uuid = require("uuid")
 const oauthSignature = require("oauth-signature")
-const replaceall = require("replaceall")
 const Blog = require('./models/blog')
 const User = require("./models/user")
 const Comment = require("./models/comment")
@@ -155,15 +151,5 @@ app.get("/blogs/:id", async (request, response) => {
     })
   }
 })
-
-// test endpoint for developing pug templates
-app.get(
-  "/test", (request, response) => {
-    response.render("blog", {
-      blog: samples.blogs[0],
-      comments: samples.comments
-    })
-  }
-)
 
 module.exports = app

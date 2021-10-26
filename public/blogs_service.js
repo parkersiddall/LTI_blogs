@@ -1,41 +1,17 @@
-window.addEventListener('DOMContentLoaded', (event) => {
-
-  console.log('This is LTI Blogs.')
+window.addEventListener("DOMContentLoaded", (event) => {
+  console.log("This is LTI Blogs.")
 
   // handle submission of new blog
-  var newBlogForm = document.getElementById('newBlogForm')
-  newBlogForm.addEventListener('submit', (event) => {
-    event.preventDefault()
-
-    var title = document.getElementById('newBlogTitle').value
-    var content = document.getElementById('newBlogContent').value
-
-    fetch('/api/blog', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        title: title,
-        content: content
-      })
-    })
-    .then(response => response.json())
-    .then((result) => {
-      insertTabeRow(result)
-      const closeNewBlogModal = document.getElementById('clodeNewBlogModal')
-      closeNewBlogModal.click()
-      newBlogForm.reset()
-    })
-    .catch(error => {
-      // throw an error pop up
-      console.log(error)
-    })
+  var newBlogForm = document.getElementById("newBlogForm")
+  newBlogForm.addEventListener("submit", (event) => {
+    processNewBlog(event)
   })
 
   // handle delete of blog button
   var deleteButtons = document.getElementsByClassName("deleteButton")
   deleteButtons = Array.from(deleteButtons)
   deleteButtons.forEach((deleteButton) => {
-    deleteButton.addEventListener('click', (event) => {
+    deleteButton.addEventListener("click", (event) => {
       processDelete(event)
     })
   })
@@ -50,24 +26,51 @@ window.addEventListener('DOMContentLoaded', (event) => {
     var blogId = elementId.substring(17)
 
     fetch(`/api/blog/${blogId}`, {
-      method: 'DELETE',
-      headers: {'Content-Type': 'application/json'}
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
     })
-    .then(response => {
-      if (response.status != 204) {
-        throw "Response is not 204!"
-      }
-      var row = document.getElementById(`tableRow-${blogId}`)
-      row.remove()
-    })
-    .catch(error => {
-      // throw an error pop up
-      console.log(error)
-    })
+      .then((response) => {
+        if (response.status != 204) {
+          throw "Response is not 204!"
+        }
+        var row = document.getElementById(`tableRow-${blogId}`)
+        row.remove()
+      })
+      .catch((error) => {
+        // throw an error pop up
+        console.log(error)
+      })
   }
-  
+
+  function processNewBlog(event) {
+    event.preventDefault()
+
+    var title = document.getElementById("newBlogTitle").value
+    var content = document.getElementById("newBlogContent").value
+
+    fetch("/api/blog", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: title,
+        content: content,
+      }),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        insertTabeRow(result)
+        const closeNewBlogModal = document.getElementById("clodeNewBlogModal")
+        closeNewBlogModal.click()
+        newBlogForm.reset()
+      })
+      .catch((error) => {
+        // throw an error pop up
+        console.log(error)
+      })
+  }
+
   function insertTabeRow(responseData) {
-    var newTableRow = document.createElement('tr')
+    var newTableRow = document.createElement("tr")
     newTableRow.id = `tableRow-${responseData.blog.id}`
 
     newTableRow.innerHTML = `
@@ -98,17 +101,21 @@ window.addEventListener('DOMContentLoaded', (event) => {
         </div>
       </td>
     `
-    var table = document.getElementById('table')
+    var table = document.getElementById("table")
     table.appendChild(newTableRow)
-    var newDeleteButton = document.getElementById(`deleteBlogButton-${responseData.blog.id}`)
-    newDeleteButton.addEventListener('click', (event) => {
+    var newDeleteButton = document.getElementById(
+      `deleteBlogButton-${responseData.blog.id}`
+    )
+    newDeleteButton.addEventListener("click", (event) => {
       processDelete(event)
     })
 
     // add CIMRequest button if necessary
     if (responseData.ltiMessageType == "ContentItemSelectionRequest") {
-      var actionButtons = document.getElementById(`buttonGroup-${responseData.blog.id}`)
-      var CIMRequestButton = document.createElement('a')
+      var actionButtons = document.getElementById(
+        `buttonGroup-${responseData.blog.id}`
+      )
+      var CIMRequestButton = document.createElement("a")
       CIMRequestButton.classList.add("btn", "btn-outline-secondary")
       CIMRequestButton.href = `/CIMRequestConfirmation/${responseData.blog.id}`
       CIMRequestButton.innerHTML = `
@@ -124,4 +131,4 @@ window.addEventListener('DOMContentLoaded', (event) => {
       actionButtons.appendChild(CIMRequestButton)
     }
   }
-});
+})
