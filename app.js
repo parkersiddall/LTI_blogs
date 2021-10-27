@@ -6,6 +6,7 @@ const session = require('express-session')
 const ltiRouter = require("./routers/lti")
 const apiRouter = require("./routers/api")
 const middleware_lti = require("./utilities/middleware_lti")
+const middleware_auth = require("./utilities/middleware_authentication")
 const uuid = require("uuid")
 const oauthSignature = require("oauth-signature")
 const Blog = require('./models/blog')
@@ -61,60 +62,80 @@ app.post("/CIMrequest",
     response.redirect(301, "/blogs")
 })
 
-// TODO: add authentication middleware to this route
 app.get("/CIMRequestConfirmation/:id",
+  middleware_auth.isAuthenticated,
   async (request, response) => {
-
-    // pull out id from post
-    const blog = await Blog.findById(request.params.id)
-
-    // construct content_items
-    const content_item = {
-      "@context" : "http://purl.imsglobal.org/ctx/lti/v1/ContentItem",
-      "@graph" : [
-        { "@type" : "LtiLinkItem",
-          "url" : `http://localhost/lti/blogs/${blog.id}`,
-          "mediaType" : "application/vnd.ims.lti.v1.ltilink",
-          "title" : blog.title,
-          "text" : "Click this link to view the blog and comments.",
-        }
-      ]
+    // checks should be done to ensure that it is the blog creator making the request
+    // or use roles to check that it is not a student
+    try {
+      const blog = await Blog.findById(request.params.id)
+      const creator = await User.findOne({
+        username: request.session.auth.lis_person_contact_email_primary,
+        university: request.session.auth.oauth_consumer_key,
+      })
+      if (blog.creator._id.toString() != creator._id.toString()) {
+        return response.render("error", {
+          errorCode: 403,
+          errorMessage: "You are not the creator of this blog",
+          returnUrl: request.body.launch_presentation_return_url || "",
+        })
+      }
+  
+      // construct content_items
+      const content_item = {
+        "@context" : "http://purl.imsglobal.org/ctx/lti/v1/ContentItem",
+        "@graph" : [
+          { "@type" : "LtiLinkItem",
+            "url" : `http://localhost/lti/blogs/${blog.id}`,
+            "mediaType" : "application/vnd.ims.lti.v1.ltilink",
+            "title" : blog.title,
+            "text" : "Click this link to view the blog and comments.",
+          }
+        ]
+      }
+  
+      var content_item_string = JSON.stringify(content_item)
+      //var content_item_string = replaceall("\"", "&quot;", content_item_string)
+      //var content_item_string = replaceall("\'", "&#39;", content_item_string)
+  
+      // construct params
+      var params = {}
+      params.lti_message_type = "ContentItemSelection"
+      params.lti_version = "LTI-1p0"
+      params.content_items = content_item_string
+      params.data = request.session.auth.data
+      params.oauth_version = "1.0"
+      params.oauth_nonce = uuid.v1()
+      params.oauth_timestamp = Math.floor(Date.now() / 1000)
+      params.oauth_consumer_key = config.KEY
+      params.oauth_callback = "about:blank"
+      params.oauth_signature_method = "HMAC-SHA1"
+  
+      // make signature, add it to params
+      const httpMethod = "POST"
+      const url = request.session.auth.content_item_return_url
+      const secret = config.SECRET
+      token = null
+      const signature = oauthSignature.generate(httpMethod, url, params, secret, token, 
+        { encodeSignature: false});
+      params.oauth_signature = signature
+  
+      response.render("cimrequestconfirm", {
+        url: url,
+        params: params
+      })
+    } catch (e) {
+      return response.render("error", {
+        errorCode: e.status,
+        errorMessage: e.message,
+        returnUrl: request.body.launch_presentation_return_url || "",
+      })
     }
-
-    var content_item_string = JSON.stringify(content_item)
-    //var content_item_string = replaceall("\"", "&quot;", content_item_string)
-    //var content_item_string = replaceall("\'", "&#39;", content_item_string)
-
-    // construct params
-    var params = {}
-    params.lti_message_type = "ContentItemSelection"
-    params.lti_version = "LTI-1p0"
-    params.content_items = content_item_string
-    params.data = request.session.auth.data
-    params.oauth_version = "1.0"
-    params.oauth_nonce = uuid.v1()
-    params.oauth_timestamp = Math.floor(Date.now() / 1000)
-    params.oauth_consumer_key = config.KEY
-    params.oauth_callback = "about:blank"
-    params.oauth_signature_method = "HMAC-SHA1"
-
-    // make signature, add it to params
-    const httpMethod = "POST"
-    const url = request.session.auth.content_item_return_url
-    const secret = config.SECRET
-    token = null
-    const signature = oauthSignature.generate(httpMethod, url, params, secret, token, 
-      { encodeSignature: false});
-    params.oauth_signature = signature
-
-    response.render("cimrequestconfirm", {
-      url: url,
-      params: params
-    })
 })
 
-// TODO: add session authentication middleware
-app.get("/blogs", async (request, response) => {
+app.get("/blogs",
+  middleware_auth.isAuthenticated,
+   async (request, response) => {
   try {
     const user =  await User.findOne(request.session.user)
     const blogs = await Blog.find({creator: user})
@@ -132,8 +153,9 @@ app.get("/blogs", async (request, response) => {
   }
 })
 // returns blog view without LTI launch checks
-// TODO: add session authentication middleware, only creator will be able to see their blog
-app.get("/blogs/:id", async (request, response) => {
+app.get("/blogs/:id",
+middleware_auth.isAuthenticated,
+async (request, response) => {
   try {
     const blog =  await Blog.findById(request.params.id)
     blog.creator = await User.findById(blog.creator)
