@@ -74,7 +74,6 @@ window.addEventListener("DOMContentLoaded", (event) => {
     newTableRow.id = `tableRow-${responseData.blog.id}`
 
     newTableRow.innerHTML = `
-      <td scope="row">${responseData.blog.dateCreated}</td>
       <td>${responseData.blog.title}</td>
       <td>${responseData.blog.views}</td>
       <td>${responseData.blog.comments}</td>
