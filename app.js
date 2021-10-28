@@ -5,13 +5,13 @@ const config = require("./utilities/config")
 const session = require('express-session')
 const ltiRouter = require("./routers/lti")
 const apiRouter = require("./routers/api")
+const blogsRouter = require("./routers/blogs")
 const middleware_lti = require("./utilities/middleware_lti")
 const middleware_auth = require("./utilities/middleware_authentication")
 const uuid = require("uuid")
 const oauthSignature = require("oauth-signature")
 const Blog = require('./models/blog')
 const User = require("./models/user")
-const Comment = require("./models/comment")
 
 const url = config.MONGO_URL
 
@@ -52,6 +52,7 @@ app.get("/", (request, response) => {
 
 app.use("/lti", ltiRouter)
 app.use("/api", apiRouter)
+app.use("/blogs", blogsRouter)
 
 app.post("/CIMrequest",
   middleware_lti.confirm_launch_request,
@@ -131,47 +132,6 @@ app.get("/CIMRequestConfirmation/:id",
         returnUrl: request.body.launch_presentation_return_url || "",
       })
     }
-})
-
-app.get("/blogs",
-  middleware_auth.isAuthenticated,
-   async (request, response) => {
-  try {
-    const user =  await User.findOne(request.session.user)
-    const blogs = await Blog.find({creator: user})
-
-    response.render("blogs", {
-      session: request.session.auth,
-      blogs: blogs
-    })
-  } catch (e) {
-    return response.render("error", {
-      errorCode: 404,
-      errorMessage: e.message,
-      returnUrl: request.body.launch_presentation_return_url,
-    })
-  }
-})
-// returns blog view without LTI launch checks
-app.get("/blogs/:id",
-middleware_auth.isAuthenticated,
-async (request, response) => {
-  try {
-    const blog =  await Blog.findById(request.params.id)
-    blog.creator = await User.findById(blog.creator)
-    const comments = await Comment.find({blog: blog}).populate("creator")
-    response.render("blog", {
-      blog: blog,
-      comments: comments
-    })
-  } catch (error) {
-    console.log(error)
-    return response.render("error", {
-      errorCode: 404,
-      errorMessage: "Blog not found.",
-      returnUrl: request.body.launch_presentation_return_url,
-    })
-  }
 })
 
 module.exports = app
