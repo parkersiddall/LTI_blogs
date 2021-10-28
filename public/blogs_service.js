@@ -116,7 +116,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
       )
       var CIMRequestButton = document.createElement("a")
       CIMRequestButton.classList.add("btn", "btn-outline-secondary")
-      CIMRequestButton.href = `/CIMRequestConfirmation/${responseData.blog.id}`
+      CIMRequestButton.href = `/lti/CIMRequestConfirmation/${responseData.blog.id}`
       CIMRequestButton.innerHTML = `
         <svg class="bi bi-link-45deg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
           <path
