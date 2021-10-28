@@ -64,6 +64,9 @@ apiRouter.post("/comment/:id", async (request, response) => {
       comment: request.body.comment,
     })
 
+    blog.comments = blog.comments + 1
+    blog.save()
+
     const result = await newComment.save()
     response.json(result)
   } catch (error) {

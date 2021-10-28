@@ -40,11 +40,9 @@ async (request, response) => {
     const blog =  await Blog.findById(request.params.id)
     blog.creator = await User.findById(blog.creator)
     const comments = await Comment.find({blog: blog}).populate("creator")
-    response.render("blog", {
-      blog: blog,
-      comments: comments
-    })
-    // TODO: add 1 view to blog
+
+    blog.views = blog.views + 1
+    blog.save()
 
     response.render("blog", {
       blog: blog,
