@@ -1,0 +1,30 @@
+version: '3.5'
+
+services:
+  db:
+    image: mongo:latest
+    container_name: lti-blogs-db
+    restart: always
+    environment:
+      - MONGO_INITDB_DATABASE=lti-blogs
+      - MONGO_INITDB_ROOT_USERNAME=user
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - ./mongo-volume:/data/db
+    ports:
+      - 27017:27017
+      
+  server:
+    build: .
+    container_name: lti-blogs
+    ports:
+      - 80:${PORT}
+    depends_on:
+      - db
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - PORT=${PORT}
+      - SECRET=${SECRET}
+      - MONGO_URL=${MONGO_URL}
+      - SESSION_SECRET=${SESSION_SECRET}
