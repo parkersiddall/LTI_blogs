@@ -1,35 +1,33 @@
-# LTI 1.1
-This is a simple blog app to test out some of the features of LTI 1.1 such as:
-- Basic launch
-- Deep linking
+# LTI Blogs
+This is a simple blog app that integrates with learning managements systems (Blackboard, Moodle, Canvas, etc.) via the LTI 1.1 standard. LMS users can launch into the app and be authenticated automatically based on trust between the LMS and the app. Professors are able to create blogs and then "deep link" them into their course. Students can click on these links and leave comments.
 
-Course instructors will be able to launch the tool and create blog posts. Then they will be able to insert a deep link to a specific post within their course for students to access and comment on.
+Comments left on blog posts are visible to all users and are not segregated based on the course the student launches from. This is an example of a feature extension that the app provides: a professor can hold a discussion that incorporates students enrolled in different courses.
 
-## routes
-- GET `/` will return a landing page where a user will be able to register for a key secret
-- POST `/lti` is used for a basic launch. Only the Instructor role is authorized for this. If successful, the user will see a list of their blogs and have the option of creating a new blog or viewing existing blogs.
-- POST `/lti/blog/<blog id>` used for basic lti launches that open up an individual blog. These links are typically going to be inserted into the course content via deep linking.
-- GET `/lti/blog/<blog id>` used to display a blog without when the user has already launched into the TP
-- POST `/CIMrequest` used to for LTI Content Item Message request. Presents user with a list of their blog (same view as /lti) but each blog will have a button to deep link the blog to the course.
-- GET `/CIMRequestConfirmation/<id>` route used once user has chosen deep linking content from /CIMrequest. This view prepares the form that will be submitted back to TC.
-- GET `/test` will eventually be removed. Currently used to experiment with pug templates...
+## Instructions to run the app locally
+Using Docker it is easy to get up and running, just follow these steps:
+1. Clone this repository and cd into it
+2. Configure your .env file using the example provided (NOTE: The Mongo_URL is already set based on the hardcoded user/pwd/db name)
+3. Run `docker compose up`
+4. Configure LTI integration in your LMS (see below)
 
-## Resources and References
-- [BBDN-LTI-Tool-Provider-Node](https://github.com/blackboard/BBDN-LTI-Tool-Provider-Node)
-- [LTI 1.1 Implementation Guide](https://www.imsglobal.org/specs/ltiv1p1/implementation-guide)
+## Configure the app in Blackboard
+1. Go to the Admin page, select "LTI Tool Providers" within the "Integrations" section.
+2. Click on "Register LTI 1.1 Provider", enter the following settings then click submit:
+    - Provider Domain: localhost
+    - Provider Domain Status: Approved
+    - Default Configuration: Set seperately for each link
+    - Send User Data: Send user data over any connection
+    - User Fields to send: Role in Course, Name, Email Address
+    - Allow Membership Service Access: Yes
+3. From the list of LTI providers, click the dropdown in the row "localhost", then click "Manage Placements"
+4. Click "Create Placement", enter in the following settings, then click submit:
+    - Label: LTI Blogs
+    - Handle: lti-blogs
+    - Availability: Yes
+    - Type: Deep linking content tool (without student access)
+    - Launch in New Window: Yes (necessary because it is not SSL)
+    - Tool Provider URL: http://localhost/lti
+    - Tool Provider Key: (insert KEY value from your .env file)
+    - Tool Provider Secret: (insert SECRET value from your .env file)
 
-## Temporary Notes
-### Mongo DB Docker container:
-- docker container run --name mydatabase --publish 27017:27017 -d mongo
-- For the moment I configured the lti database in the mongo shell. It is necessary to create a database (and a user - but this is to be checked)
-- Look into volumes for mongodb, and how to create the js config file
-
-Mongo DB Shell commands:
-```
-#mongo
-#use lti
-TODO: insert mongo shell commands to create user
-```
-
-### express-session
-- TODO: configure sessionStore with mongodb
+After these steps you should be able to access the tool from without your course.
